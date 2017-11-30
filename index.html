@@ -9,8 +9,23 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+        <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
     </head>
     <body>
-        <div>TODO write content</div>
+        <script>
+            var connection = new RTCMultiConnection();
+
+// this line is VERY_important
+            connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+// if you want audio+video conferencing
+            connection.session = {
+                audio: true,
+                video: true
+            };
+
+            connection.openOrJoin('XXX');
+        </script>
     </body>
 </html>
