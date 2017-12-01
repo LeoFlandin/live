@@ -43,6 +43,9 @@
 
                 var token = connection.token();
                 connection.open(token, function () {
+                    connection.attachStreams.forEach(function(stream){
+                        document.getElementById(stream.streamid).removeAttribute("controls"); 
+                    });
                     /**
                      * Lorsque l'on lance le Live, on prévient le player
                      * Cas 1°) ---player-ON-->--live-ON--->
