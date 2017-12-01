@@ -1,0 +1,77 @@
+<!-- Demo version: 2017.08.12 -->
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Video OneWay Broadcasting using RTCMultiConnection</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    </head>
+    <body>
+
+        <div id="videos-container"></div>
+
+        <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+        <script src="https://rtcmulticonnection.herokuapp.com/dev/adapter.js"></script>
+        <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+
+        <script>
+            window.enableAdapter = true; // enable adapter.js
+
+            var connection = new RTCMultiConnection();
+            connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+            connection.socketMessageEvent = 'mydigiplay-live-message-event';
+            connection.session = {
+                audio: true,
+                video: true,
+                oneway: true
+            };
+
+            connection.videosContainer = document.getElementById('videos-container');
+            connection.onstream = function (event) {
+                console.log('live play ON !');
+                if (event.type === 'remote') {
+                    var video = event.mediaElement;
+                    connection.videosContainer.appendChild(video);
+                }
+            };
+
+            connection.socketCustomEvent = 'mydigiplay-live';
+            connection.connectSocket(function () {
+                /**
+                 * Au démarrage, on vérie si un Live n'est pas déjà en cours
+                 * Si oui, le Live nous répondra par un message "liveON" 
+                 */
+                connection.socket.emit(connection.socketCustomEvent, "isLiveON?");
+
+                /**
+                 * On écoute pour le Live qui nous informe qu'un live a commencé
+                 */
+                connection.socket.on(connection.socketCustomEvent, function (message) {
+                    if (message.liveON) {
+                        console.log("<<<<liveON");
+                        console.log("joining... " + message.liveON);
+                        connection.sdpConstraints.mandatory = {
+                            OfferToReceiveAudio: true,
+                            OfferToReceiveVideo: true
+                        };
+                        setTimeout(function () {
+                            connection.join(message.liveON);
+                        }, 1000);
+                    }
+                });
+            });
+
+            connection.onstreamended = function (event) {
+                console.log('onstreamended');
+                var mediaElement = document.getElementById(event.streamid);
+                if (mediaElement) {
+                    mediaElement.parentNode.removeChild(mediaElement);
+                }
+            };
+
+        </script>
+
+        <script src="https://cdn.webrtc-experiment.com/common.js"></script>
+    </body>
+</html>

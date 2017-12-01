@@ -1,0 +1,89 @@
+<!-- Demo version: 2017.08.12 -->
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Video OneWay Broadcasting using RTCMultiConnection</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    </head>
+    <body>
+
+        <section class="make-center">
+            <!--<input type="text" id="room-id" value="WWW" size=20>-->
+            <button id="open-room">Open Room</button>
+            <button id="close-room" disabled>Close Room</button>
+            <div id="videos-container"></div>
+        </section>
+
+        <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+        <script src="https://rtcmulticonnection.herokuapp.com/dev/adapter.js"></script>
+        <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+
+        <script>
+            window.enableAdapter = true;
+
+            var connection = new RTCMultiConnection();
+            connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+            connection.socketMessageEvent = 'mydigiplay-live-message-event';
+            connection.session = {
+                audio: true,
+                video: true,
+                oneway: true
+            };
+            connection.sdpConstraints.mandatory = {
+                OfferToReceiveAudio: false,
+                OfferToReceiveVideo: false
+            };
+            connection.socketCustomEvent = 'mydigiplay-live';
+
+            document.getElementById('open-room').onclick = function () {
+                document.getElementById('open-room').disabled = true;
+                document.getElementById('close-room').disabled = false;
+
+                var token = connection.token();
+                connection.open(token, function () {
+                    /**
+                     * Lorsque l'on lance le Live, on prévient le player
+                     * Cas 1°) ---player-ON-->--live-ON--->
+                     */
+                    console.log("liveON>>>> " + token);
+                    connection.socket.emit(connection.socketCustomEvent, {
+                        liveON: token
+                    });
+
+                    /**
+                     * Après son démarrage, le player nous demande si un Live est en cours
+                     * Cas 2°) --live-ON--->--player-ON-->
+                     */
+                    connection.socket.on(connection.socketCustomEvent, function (message) {
+                        if (message === "isLiveON?") {
+                            if (connection.attachStreams.length > 0) {
+                                console.log("yes, liveON>>>> " + token);
+                                connection.socket.emit(connection.socketCustomEvent, {
+                                    liveON: token
+                                });
+                            }
+                        }
+                    });
+                });
+            };
+
+            document.getElementById('close-room').onclick = function () {
+                // stop all local cameras
+                connection.attachStreams.forEach(function (localStream) {
+                    localStream.stop();
+                });
+
+                // close socket.io connection
+                connection.close();
+
+                document.getElementById('open-room').disabled = false;
+                document.getElementById('close-room').disabled = true;
+            };
+
+        </script>
+
+        <script src="https://cdn.webrtc-experiment.com/common.js"></script>
+    </body>
+</html>
