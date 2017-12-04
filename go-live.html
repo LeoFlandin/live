@@ -11,8 +11,8 @@
 
         <section class="make-center">
             <!--<input type="text" id="room-id" value="WWW" size=20>-->
-            <button id="open-room">Open Room</button>
-            <button id="close-room" disabled>Close Room</button>
+            <button id="open-room">Go Live !</button>
+            <button id="close-room" disabled>Stop</button>
             <div id="videos-container"></div>
         </section>
 
@@ -35,7 +35,36 @@
                 OfferToReceiveAudio: false,
                 OfferToReceiveVideo: false
             };
+//            connection.mediaConstraints = {
+//                audio: true,
+//                video: {
+//                    mandatory: {
+//                        minWidth: 500,
+//                        maxWidth: 500,
+//                        minHeight: 300,
+//                        maxHeight: 300,
+//                    },
+//                    optional: [{
+//                            facingMode: 'user' // or "application"
+//                        }]
+//                }
+//            };
             connection.socketCustomEvent = 'mydigiplay-live';
+            connection.onstream = function (event) {
+                console.log('live play ON !');
+                if (event.type === 'local') {
+                    var video = event.mediaElement;
+                    video.removeAttribute("controls");
+                    connection.videosContainer.appendChild(video);
+                }
+            };
+            connection.onstreamended = function (event) {
+                console.log('onstreamended');
+                var mediaElement = document.getElementById(event.streamid);
+                if (mediaElement) {
+                    mediaElement.parentNode.removeChild(mediaElement);
+                }
+            };
 
             document.getElementById('open-room').onclick = function () {
                 document.getElementById('open-room').disabled = true;
@@ -43,9 +72,7 @@
 
                 var token = connection.token();
                 connection.open(token, function () {
-                    connection.attachStreams.forEach(function(stream){
-                        document.getElementById(stream.streamid).removeAttribute("controls"); 
-                    });
+
                     /**
                      * Lorsque l'on lance le Live, on prévient le player
                      * Cas 1°) ---player-ON-->--live-ON--->
