@@ -4,7 +4,7 @@
 <html lang="en" dir="ltr">
     <head>
         <meta charset="utf-8">
-        <title>Live Streaming</title>
+        <title>Video OneWay Broadcasting using RTCMultiConnection</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     </head>
     <body>
@@ -23,13 +23,9 @@
         <script>
             window.enableAdapter = true;
 
-            var dgbAppli = prompt("Nom de l'appli", "");
-            var dgbBorneId = prompt("Numéro de l'écran", "");
-            var dgbtoken = dgbAppli + "-" + dgbBorneId;
             var connection = new RTCMultiConnection();
             connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-            connection.socketMessageEvent = 'mydigiplay-live-' + dgbtoken;
-            console.log("connection.socketMessageEvent", connection.socketMessageEvent);
+            connection.socketMessageEvent = 'mydigiplay-live-message-event';
             connection.session = {
                 audio: true,
                 video: true,
@@ -53,8 +49,7 @@
 //                        }]
 //                }
 //            };
-            connection.socketCustomEvent = 'mydigiplay-live-' + dgbtoken;
-            console.log("connection.socketCustomEvent", connection.socketCustomEvent);
+            connection.socketCustomEvent = 'mydigiplay-live';
             connection.onstream = function (event) {
                 console.log('live play ON !');
                 if (event.type === 'local') {
