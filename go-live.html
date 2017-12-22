@@ -29,6 +29,7 @@
             var connection = new RTCMultiConnection();
             connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
             connection.socketMessageEvent = 'mydigiplay-live-' + dgbtoken;
+            console.log("connection.socketMessageEvent", connection.socketMessageEvent);
             connection.session = {
                 audio: true,
                 video: true,
@@ -52,7 +53,8 @@
 //                        }]
 //                }
 //            };
-            connection.socketCustomEvent = 'mydigiplay-live' + dgbtoken;
+            connection.socketCustomEvent = 'mydigiplay-live-' + dgbtoken;
+            console.log("connection.socketCustomEvent", connection.socketCustomEvent);
             connection.onstream = function (event) {
                 console.log('live play ON !');
                 if (event.type === 'local') {
