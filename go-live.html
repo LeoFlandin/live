@@ -25,10 +25,10 @@
 
             var dgbAppli = prompt("Nom de l'appli", "");
             var dgbBorneId = prompt("Numéro de l'écran", "");
-            
+            var dgbtoken = dgbAppli + "-" + dgbBorneId;
             var connection = new RTCMultiConnection();
             connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-            connection.socketMessageEvent = 'mydigiplay-live-' + dgbAppli + "-" + dgbBorneId;
+            connection.socketMessageEvent = 'mydigiplay-live-' + dgbtoken;
             connection.session = {
                 audio: true,
                 video: true,
@@ -52,7 +52,7 @@
 //                        }]
 //                }
 //            };
-            connection.socketCustomEvent = 'mydigiplay-live';
+            connection.socketCustomEvent = 'mydigiplay-live' + dgbtoken;
             connection.onstream = function (event) {
                 console.log('live play ON !');
                 if (event.type === 'local') {
